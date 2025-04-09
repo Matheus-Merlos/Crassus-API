@@ -1,0 +1,8 @@
+dist
+node_modules
+*.vscode
+*.prettierrc
+*.gitignore
+*.md
+eslint.config.mjs
+nest-cli.json
