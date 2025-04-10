@@ -1,0 +1,51 @@
+api.crassus.com.br:
+  /login:
+    - POST:
+      - email*
+      - password*
+  /register:
+    - POST:
+      - email*
+      - name*
+      - password*
+      - birthdate*
+      - gender*
+    
+  /races:
+    /:userId:
+      - /:raceId:
+        - GET
+        - DELETE
+      - GET
+      - POST:
+        - name*
+        - georeference*
+        - startTime
+        - endTime
+
+  /meals:
+    /types:
+      - GET
+    /:userId:
+      - /:mealId:
+        - GET
+        - DELETE
+      - GET
+      - POST:
+        - name*
+        - type*
+        - timestamp*
+        - foods*:
+          - foodId*
+          - quantity*
+      - PATCH:
+        - name
+        - type
+        - timestamp
+        - foods:
+          - foodId
+          - quantity
+
+
+  /foods:
+    - GET
