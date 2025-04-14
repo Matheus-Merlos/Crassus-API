@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { createHash, randomBytes } from 'crypto';
-import { eq } from 'drizzle-orm';
+import { eq, InferSelectModel } from 'drizzle-orm';
 import * as jwt from 'jsonwebtoken';
 import db from 'src/db';
 import { user as userModel } from 'src/db/schema';
-import { LoginDTO } from './auth.dto';
+import { LoginDTO, RegisterDTO } from './auth.dto';
 import {
+  UserExistsException,
   UserNotFoundException,
   WrongPasswordException,
 } from './auth.exceptions';
@@ -13,6 +14,40 @@ import {
 @Injectable()
 export class AuthService {
   private readonly jwtSecret = process.env.TOKEN_SECRET!;
+
+  async register(request: RegisterDTO) {
+    let user: InferSelectModel<typeof userModel>;
+
+    const [day, month, year] = request.birthdate.split('/');
+    const birthdate = `${year}-${month}-${day}`;
+
+    const salt = this.createSalt();
+
+    try {
+      [user] = await db
+        .insert(userModel)
+        .values({
+          name: request.name,
+          email: request.email,
+          gender: request.gender as 'M' | 'F',
+          salt,
+          passwordHash: this.digest(`${salt}${request.password}`),
+          height: request.height,
+          weight: request.weight,
+          birthdate,
+        })
+        .returning();
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message.toUpperCase().includes('UNIQUE')) {
+          throw new UserExistsException();
+        }
+        throw new Error(error.message);
+      }
+    }
+
+    return user!;
+  }
 
   async login(request: LoginDTO) {
     const [user] = await db
@@ -30,7 +65,7 @@ export class AuthService {
     const token = jwt.sign(user, this.jwtSecret, { expiresIn: 15552000 });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { passwordHash, ...userReturn } = user;
+    const { passwordHash, salt, ...userReturn } = user;
 
     return { ...userReturn, token };
   }
