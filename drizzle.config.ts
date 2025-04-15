@@ -1,9 +1,12 @@
 import 'dotenv/config';
 import { defineConfig } from 'drizzle-kit';
 
+const env = process.env.ENV!;
+const schemaParentFolder = env === 'prod' ? 'dist' : 'src';
+
 export default defineConfig({
   out: './drizzle',
-  schema: './src/db/schema',
+  schema: `./${schemaParentFolder}/db/schema`,
   dialect: 'postgresql',
   dbCredentials: {
     user: process.env.POSTGRES_USER!,
