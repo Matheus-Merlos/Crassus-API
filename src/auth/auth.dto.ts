@@ -17,6 +17,9 @@ export class RegisterDTO {
   @IsString()
   @MaxLength(255)
   @MinLength(8)
+  @Matches(/^(\w+\s+\w+.*)$/, {
+    message: 'Name must contain at least two words',
+  })
   name: string;
 
   @IsEmail()
@@ -36,10 +39,10 @@ export class RegisterDTO {
   @IsEnum(Gender)
   gender: string;
 
-  @IsDecimal()
+  @IsDecimal({ decimal_digits: '2', force_decimal: true })
   height: string;
 
-  @IsDecimal()
+  @IsDecimal({ decimal_digits: '2', force_decimal: true })
   weight: string;
 }
 

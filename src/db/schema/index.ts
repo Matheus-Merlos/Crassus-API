@@ -1,3 +1,3 @@
-import user from './models/user';
+import user from './user';
 
 export { user };

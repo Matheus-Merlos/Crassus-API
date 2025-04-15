@@ -9,7 +9,6 @@
     "makemigrations": "npx drizzle-kit generate",
     "migrate": "npx drizzle-kit migrate",
     "studio": "npx drizzle-kit studio",
-
     "build": "nest build",
     "start": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -24,6 +23,7 @@
     "class-validator": "^0.14.1",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.41.0",
+    "jsonwebtoken": "^9.0.2",
     "pg": "^8.15.6",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
@@ -38,6 +38,7 @@
     "@swc/core": "^1.10.7",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.10.7",
     "@types/pg": "^8.11.14",
     "@types/supertest": "^6.0.2",
