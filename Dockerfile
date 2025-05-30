@@ -1,4 +1,4 @@
-ARG image=node:23.11.1-alpine3.20
+ARG image=node:18-alpine
 
 FROM ${image} AS buildDeps
 
