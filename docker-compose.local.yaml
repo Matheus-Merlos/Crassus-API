@@ -1,0 +1,14 @@
+services:
+  database:
+    container_name: ${POSTGRES_HOST}
+    image: postgres:15.13-alpine3.21
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    env_file:
+      - .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:

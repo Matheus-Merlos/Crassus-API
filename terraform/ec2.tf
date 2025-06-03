@@ -17,7 +17,6 @@ resource "aws_instance" "crassus_server" {
 
   tags = {
     Name       = "crassus-server"
-    Auto-Start = true
   }
 }
 

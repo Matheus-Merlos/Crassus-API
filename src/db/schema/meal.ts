@@ -9,5 +9,5 @@ export default pgTable('meal', {
       onDelete: 'cascade',
       onUpdate: 'cascade',
     }),
-  createAt: timestamp('create_at', { mode: 'date' }).notNull().defaultNow(),
+  createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
 });
