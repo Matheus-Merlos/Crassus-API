@@ -8,11 +8,11 @@ type Food = InferSelectModel<typeof food>;
 @Injectable()
 export class FoodsService {
   async list(query: string = ''): Promise<Array<Food>> {
-    const foods = (await db
+    const foods = await db
       .select()
       .from(food)
       .where(ilike(food.name, `%${query}%`))
-      .limit(25)) as Array<Food>;
+      .limit(25);
 
     return foods;
   }
