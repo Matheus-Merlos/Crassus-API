@@ -1,9 +1,12 @@
 import {
+  BadRequestException,
   Body,
+  ConflictException,
   Controller,
   HttpCode,
   HttpException,
   HttpStatus,
+  NotFoundException,
   Post,
 } from '@nestjs/common';
 import { LoginDTO, RegisterDTO } from './auth.dto';
@@ -24,10 +27,7 @@ export class AuthController {
       return await this.authService.register(body);
     } catch (error) {
       if (error instanceof UserExistsException)
-        throw new HttpException(
-          'User with this e-mail already exists.',
-          HttpStatus.CONFLICT,
-        );
+        throw new ConflictException('User with this e-mail already exists.');
       else
         throw new HttpException(
           `Internal server error: ${(error as Error).message}.`,
@@ -43,9 +43,9 @@ export class AuthController {
       return await this.authService.login(body);
     } catch (error) {
       if (error instanceof UserNotFoundException)
-        throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
+        throw new NotFoundException('User not found.');
       else if (error instanceof WrongPasswordException)
-        throw new HttpException('Wrong password.', HttpStatus.BAD_REQUEST);
+        throw new BadRequestException('Wrong password.');
       else
         throw new HttpException(
           `Internal server error: ${(error as Error).message}`,
