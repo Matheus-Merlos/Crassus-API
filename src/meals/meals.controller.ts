@@ -30,7 +30,13 @@ export class MealsController {
   }
 
   @Get(':userId')
-  async listMeals() {}
+  async listMeals(@Param('userId') userId: string) {
+    try {
+      return this.mealService.listUserMeals(+userId);
+    } catch (error) {
+      return;
+    }
+  }
 
   @Post(':userId')
   async createMeal(@Param('userId') userId: string, @Body() mealBody: MealDTO) {
