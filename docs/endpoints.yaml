@@ -26,10 +26,10 @@ api.crassus.com.br:
   /meals:
     /types:
       - GET
+    /:mealId:
+      - GET
+      - DELETE
     /:userId:
-      - /:mealId:
-        - GET
-        - DELETE
       - GET
       - POST:
         - name*

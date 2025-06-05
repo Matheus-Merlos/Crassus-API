@@ -6,11 +6,15 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
 } from '@nestjs/common';
 import { MealDTO } from './meals.dto';
-import { FoodNotFoundException } from './meals.exceptions';
+import {
+  FoodNotFoundException,
+  MealNotFoundException,
+} from './meals.exceptions';
 import { MealsService } from './meals.service';
 
 @Controller('meals')
@@ -55,6 +59,17 @@ export class MealsController {
   @Get(':userId/:mealId')
   retrieveMeal() {}
 
-  @Delete(':userId/:mealId')
-  deleteMeal() {}
+  @Delete(':mealId')
+  async deleteMeal(@Param('mealId') mealId: string) {
+    try {
+      await this.mealService.deleteUserMeal(+mealId);
+    } catch (error) {
+      if (error instanceof MealNotFoundException)
+        throw new NotFoundException(error.message);
+      throw new HttpException(
+        `Internal server error: ${(error as Error).message}.`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
