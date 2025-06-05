@@ -112,6 +112,64 @@ export class MealsService {
     return formattedMealsGroupedByDate;
   }
 
+  async describeMeal(mealId: number) {
+    const [dbMeal] = await db
+      .select({
+        id: meal.id,
+        createdAt: meal.createdAt,
+      })
+      .from(meal)
+      .where(eq(meal.id, mealId));
+    if (!dbMeal) {
+      throw new MealNotFoundException('This meal does not exists');
+    }
+
+    const foods = await db
+      .select({
+        foodId: food.id,
+        name: food.name,
+        quantity: mealFood.quantity,
+        kcal: food.calories,
+        carbs: food.carbs,
+        proteins: food.proteins,
+        fats: food.proteins,
+      })
+      .from(mealFood)
+      .where(eq(mealFood.mealId, dbMeal.id))
+      .innerJoin(food, eq(mealFood.foodId, food.id));
+
+    //contagem de macronutrientes e calories
+    let calories = 0;
+    let carbs = 0;
+    let proteins = 0;
+    let fats = 0;
+    for (const foodItem of foods) {
+      const { kcal } = foodItem;
+      let { quantity } = foodItem;
+      quantity = quantity / 100;
+
+      calories += Number(kcal) * quantity;
+      carbs += Number(foodItem.carbs);
+      proteins += Number(foodItem.proteins);
+      fats += Number(foodItem.fats);
+    }
+
+    return {
+      timestamp: dbMeal.createdAt,
+      calories: calories.toFixed(2),
+      carbs: carbs.toFixed(2),
+      proteins: proteins.toFixed(2),
+      fats: fats.toFixed(2),
+      foods: foods.map((food) => {
+        return {
+          id: food.foodId,
+          name: food.name,
+          grams: food.quantity,
+        };
+      }),
+    };
+  }
+
   async deleteUserMeal(mealId: number) {
     const [dbMeal] = await db.select().from(meal).where(eq(meal.id, mealId));
     if (!dbMeal) {

@@ -38,7 +38,10 @@ export class MealsController {
     try {
       return this.mealService.listUserMeals(+userId);
     } catch (error) {
-      return;
+      throw new HttpException(
+        `Internal server error: ${(error as Error).message}.`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -57,7 +60,18 @@ export class MealsController {
   }
 
   @Get(':userId/:mealId')
-  retrieveMeal() {}
+  async retrieveMeal(@Param('mealId') mealId: string) {
+    try {
+      return await this.mealService.describeMeal(+mealId);
+    } catch (error) {
+      if (error instanceof MealNotFoundException)
+        throw new NotFoundException(error.message);
+      throw new HttpException(
+        `Internal server error: ${(error as Error).message}.`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   @Delete(':mealId')
   async deleteMeal(@Param('mealId') mealId: string) {
