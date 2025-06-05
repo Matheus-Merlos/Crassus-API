@@ -4,5 +4,6 @@ node_modules
 *.prettierrc
 *.gitignore
 *.md
+*.sql
 eslint.config.mjs
 nest-cli.json
