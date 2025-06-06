@@ -35,8 +35,8 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/crassus-api:v${{ github.run_number }}
             ${{ secrets.DOCKER_USERNAME }}/crassus-api:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/crassus-api:latest
-          cache-to: type=inline
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   get-server-ssh-key:
     name: Pegar a chave SSH do servidor
