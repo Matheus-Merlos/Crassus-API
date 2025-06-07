@@ -64,11 +64,8 @@ jobs:
 
           terraform apply -refresh-only -auto-approve -target=aws_instance.crassus_server
 
-          SERVER_KEY=$(terraform output -raw server_private_key)
-          SERVER_IP=$(terraform output -raw server_public_ip_address)
-
-          echo "$SERVER_KEY" > server_key.pem
-          echo "$SERVER_IP" > server_ip.txt
+          terraform output -raw server_private_key > server_key.pem
+          terraform output -raw server_public_ip_address > server_ip.txt
 
       - name: Upload credentials as artifact
         uses: actions/upload-artifact@v4
@@ -97,11 +94,18 @@ jobs:
         run: |
           KEY_CONTENT=$(cat server_key.pem)
           IP_CONTENT=$(cat server_ip.txt)
-          echo "server_key=$KEY_CONTENT" >> $GITHUB_OUTPUT
+      
+          {
+            echo 'server_key<<EOF'
+            echo "$KEY_CONTENT"
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+      
           echo "server_ip=$IP_CONTENT" >> $GITHUB_OUTPUT
-
+      
           echo "::add-mask::$KEY_CONTENT"
           echo "::add-mask::$IP_CONTENT"
+        
 
       - name: Configure docker and start application
         uses: appleboy/ssh-action@v1.2.0
@@ -119,6 +123,7 @@ jobs:
           key: ${{ steps.read-credentials.outputs.server_key }}
           source: "docker-compose.yaml,src/db/food_data.sql,src/db/meal_type.sql"
           target: "/home/admin/crassus-api"
+          strip_components: 1
 
       - name: Configure docker and start application
         uses: appleboy/ssh-action@v1.2.0
