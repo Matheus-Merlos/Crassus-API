@@ -41,14 +41,11 @@ jobs:
   get-server-ssh-key:
     name: Pegar a chave SSH do servidor
     runs-on: ubuntu-latest
-    outputs:
-      server_ssh_key: ${{ steps.define-variables.outputs.server_ssh_key }}
-      server_public_ip: ${{ steps.define-variables.outputs.server_public_ip }}
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.TERRAFORM_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.TERRAFORM_AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: 'us-east-1'
-      AWS_EC2_METADATA_DISABLED: 'true'
+      AWS_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -70,16 +67,17 @@ jobs:
           SERVER_KEY=$(terraform output -raw server_private_key)
           SERVER_IP=$(terraform output -raw server_public_ip_address)
 
-          echo "::add-mask::$SERVER_KEY"
-          echo "::add-mask::$SERVER_IP"
+          echo "$SERVER_KEY" > server_key.pem
+          echo "$SERVER_IP" > server_ip.txt
 
-          {
-            echo 'server_ssh_key<<EOF'
-            echo "$SERVER_KEY"
-            echo 'EOF'
-          } >> $GITHUB_OUTPUT
-
-          echo "server_public_ip=$SERVER_IP" >> $GITHUB_OUTPUT
+      - name: Upload credentials as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-credentials-${{ github.run_number }}
+          path: |
+            terraform/server_key.pem
+            terraform/server_ip.txt
+          retention-days: 1
 
   deploy:
     name: Deploy da aplicação
@@ -88,30 +86,46 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
+      - name: Download server credentials artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: server-credentials-${{ github.run_number }}
+        
+      - name: Read credentials from files
+        id: read-credentials
+        run: |
+          KEY_CONTENT=$(cat server_key.pem)
+          IP_CONTENT=$(cat server_ip.txt)
+          echo "server_key=$KEY_CONTENT" >> $GITHUB_OUTPUT
+          echo "server_ip=$IP_CONTENT" >> $GITHUB_OUTPUT
+
+          echo "::add-mask::$KEY_CONTENT"
+          echo "::add-mask::$IP_CONTENT"
 
       - name: Configure docker and start application
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ needs.get-server-ssh-key.outputs.server_public_ip }}
+          host: ${{ steps.read-credentials.outputs.server_ip }}
           username: admin
-          key: ${{ needs.get-server-ssh-key.outputs.server_ssh_key }}
+          key: ${{ steps.read-credentials.outputs.server_key }}
           script: mkdir -p /home/admin/crassus-api
 
       - name: Copy docker-compose file
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ needs.get-server-ssh-key.outputs.server_public_ip }}
+          host: ${{ steps.read-credentials.outputs.server_ip }}
           username: admin
-          key: ${{ needs.get-server-ssh-key.outputs.server_ssh_key }}
+          key: ${{ steps.read-credentials.outputs.server_key }}
           source: "docker-compose.yaml,src/db/food_data.sql,src/db/meal_type.sql"
           target: "/home/admin/crassus-api"
 
       - name: Configure docker and start application
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ needs.get-server-ssh-key.outputs.server_public_ip }}
+          host: ${{ steps.read-credentials.outputs.server_ip }}
           username: admin
-          key: ${{ needs.get-server-ssh-key.outputs.server_ssh_key }}
+          key: ${{ steps.read-credentials.outputs.server_key }}
           script: |
             sudo apt-get install ca-certificates curl -y
             sudo install -m 0755 -d /etc/apt/keyrings
