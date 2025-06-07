@@ -96,7 +96,7 @@ jobs:
           host: ${{ needs.get-server-ssh-key.outputs.server_public_ip }}
           username: admin
           key: ${{ needs.get-server-ssh-key.outputs.server_ssh_key }}
-          source: "docker-compose.yaml"
+          source: "docker-compose.yaml,src/db/food_data.sql,src/db/meal_type.sql"
           target: "/home/admin/crassus-api"
 
       - name: Configure docker and start application
