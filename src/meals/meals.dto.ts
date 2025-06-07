@@ -11,28 +11,6 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-class MealCompactDTO {
-  @IsNumber()
-  id: number;
-
-  @IsString()
-  name: string;
-
-  @IsNumber()
-  type: number;
-
-  @IsString()
-  typeName: string;
-
-  @IsNumber()
-  calories: number;
-}
-
-export class MealDateListCompactDTO {
-  @IsArray()
-  date: Array<MealCompactDTO>;
-}
-
 class MealFoodDTO {
   @IsNumber()
   foodId: number;
