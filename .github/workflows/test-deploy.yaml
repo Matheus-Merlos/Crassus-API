@@ -94,6 +94,12 @@ jobs:
         run: |
           KEY_CONTENT=$(cat server_key.pem)
           IP_CONTENT=$(cat server_ip.txt)
+
+          while IFS= read -r line; do
+            if [[ -n "$line" ]]; then
+              echo "::add-mask::$line"
+            fi
+          done <<< "$KEY_CONTENT"
       
           {
             echo 'server_key<<EOF'
