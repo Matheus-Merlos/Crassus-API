@@ -67,12 +67,19 @@ jobs:
 
           terraform apply -refresh-only -auto-approve -target=aws_instance.crassus_server
 
+          SERVER_KEY=$(terraform output -raw server_private_key)
+          SERVER_IP=$(terraform output -raw server_public_ip_address)
+
+          echo "::add-mask::$SERVER_KEY"
+          echo "::add-mask::$SERVER_IP"
+
           {
             echo 'server_ssh_key<<EOF'
-            terraform output -raw server_private_key
+            echo "$SERVER_KEY"
             echo 'EOF'
           } >> $GITHUB_OUTPUT
-           echo "server_public_ip=$(terraform output -raw server_public_ip_address)" >> $GITHUB_OUTPUT
+
+          echo "server_public_ip=$SERVER_IP" >> $GITHUB_OUTPUT
 
   deploy:
     name: Deploy da aplicação
