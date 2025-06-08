@@ -97,19 +97,7 @@ export class MealsService {
       }),
     );
 
-    const formattedMealsGroupedByDate = {};
-    formattedMeals.forEach((meal) => {
-      const date = meal.createdAt;
-
-      if (!formattedMealsGroupedByDate[date]) {
-        formattedMealsGroupedByDate[date] = [];
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      formattedMealsGroupedByDate[date].push(meal);
-    });
-
-    return formattedMealsGroupedByDate;
+    return formattedMeals;
   }
 
   async describeMeal(mealId: number) {
