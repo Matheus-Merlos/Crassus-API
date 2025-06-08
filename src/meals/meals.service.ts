@@ -102,7 +102,46 @@ export class MealsService {
       }),
     );
 
-    return formattedMeals;
+    const formattedMealsGroupedByDate: Record<
+      string,
+      Array<{
+        id: number;
+        mealTypeId: number;
+        mealType: string;
+        createdAt: string;
+        name: string;
+        calories: string;
+      }>
+    > = {};
+    formattedMeals.forEach((meal) => {
+      const date = meal.createdAt;
+
+      if (!formattedMealsGroupedByDate[date]) {
+        formattedMealsGroupedByDate[date] = [];
+      }
+
+      formattedMealsGroupedByDate[date].push(meal);
+    });
+
+    const response: Array<{
+      date: string;
+      meals: Array<{
+        id: number;
+        mealTypeId: number;
+        mealType: string;
+        createdAt: string;
+        name: string;
+        calories: string;
+      }>;
+    }> = [];
+    for (const [date, meals] of Object.entries(formattedMealsGroupedByDate)) {
+      response.push({
+        date,
+        meals,
+      });
+    }
+
+    return response;
   }
 
   async describeMeal(mealId: number) {
