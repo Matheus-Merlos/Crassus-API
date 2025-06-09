@@ -2,8 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode,
-  HttpStatus,
   NotFoundException,
   Param,
   ParseIntPipe,
@@ -32,7 +30,6 @@ export class RacesController {
 
   // Criado desta maneira para caso usuário não for encontrado já cair fora
   @Post(':id/points')
-  @HttpCode(HttpStatus.CREATED)
   async addPoint(
     @Param('id', ParseIntPipe) raceId: number,
     @Query('userId', ParseIntPipe) userId: number,
