@@ -6,17 +6,15 @@ import {
   Get,
   HttpException,
   HttpStatus,
-  NotFoundException,
   Param,
   ParseIntPipe,
   Post,
 } from '@nestjs/common';
+import { IsUserPipe } from 'src/pipes/is-user.pipe';
+import { ParseMealPipe } from 'src/pipes/parse-meal.pipe';
 import { ParseUserPipe } from 'src/pipes/parse-user.pipe';
 import { MealDTO } from './meals.dto';
-import {
-  FoodNotFoundException,
-  MealNotFoundException,
-} from './meals.exceptions';
+import { FoodNotFoundException } from './meals.exceptions';
 import { MealsService } from './meals.service';
 
 @Controller('meals')
@@ -37,7 +35,7 @@ export class MealsController {
 
   @Get(':userId')
   async listMeals(
-    @Param('userId', ParseIntPipe, ParseUserPipe) userId: number,
+    @Param('userId', ParseIntPipe, ParseUserPipe, IsUserPipe) userId: number,
   ) {
     try {
       return this.mealService.listUserMeals(userId);
@@ -51,7 +49,7 @@ export class MealsController {
 
   @Post(':userId')
   async createMeal(
-    @Param('userId', ParseIntPipe, ParseUserPipe) userId: number,
+    @Param('userId', ParseIntPipe, ParseUserPipe, IsUserPipe) userId: number,
     @Body() mealBody: MealDTO,
   ) {
     try {
@@ -68,13 +66,12 @@ export class MealsController {
 
   @Get(':userId/:mealId')
   async retrieveMeal(
-    @Param('mealId', ParseIntPipe, ParseUserPipe) mealId: number,
+    @Param('userId', ParseIntPipe, ParseUserPipe, IsUserPipe) userId: number,
+    @Param('mealId', ParseIntPipe, ParseMealPipe) mealId: number,
   ) {
     try {
       return await this.mealService.describeMeal(mealId);
     } catch (error) {
-      if (error instanceof MealNotFoundException)
-        throw new NotFoundException(error.message);
       throw new HttpException(
         `Internal server error: ${(error as Error).message}.`,
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -83,12 +80,12 @@ export class MealsController {
   }
 
   @Delete(':mealId')
-  async deleteMeal(@Param('mealId') mealId: string) {
+  async deleteMeal(
+    @Param('mealId', ParseIntPipe, ParseMealPipe) mealId: string,
+  ) {
     try {
       await this.mealService.deleteUserMeal(+mealId);
     } catch (error) {
-      if (error instanceof MealNotFoundException)
-        throw new NotFoundException(error.message);
       throw new HttpException(
         `Internal server error: ${(error as Error).message}.`,
         HttpStatus.INTERNAL_SERVER_ERROR,
