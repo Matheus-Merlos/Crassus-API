@@ -52,10 +52,10 @@ export class PerformanceService {
 
     const [macroNutrients] = await db
       .select({
-        consumedCalories: sql<number>`SUM((${food.calories} * ${mealFood.quantity}) / 100)`,
-        consumedProteins: sql<number>`SUM((${food.proteins} * ${mealFood.quantity}) / 100)`,
-        consumedCarbs: sql<number>`SUM((${food.carbs} * ${mealFood.quantity}) / 100)`,
-        consumedFats: sql<number>`SUM((${food.fats} * ${mealFood.quantity}) / 100)`,
+        consumedCalories: sql<number>`COALESCE(SUM((${food.calories} * ${mealFood.quantity}) / 100), 0)`,
+        consumedProteins: sql<number>`COALESCE(SUM((${food.proteins} * ${mealFood.quantity}) / 100), 0)`,
+        consumedCarbs: sql<number>`COALESCE(SUM((${food.carbs} * ${mealFood.quantity}) / 100), 0)`,
+        consumedFats: sql<number>`COALESCE(SUM((${food.fats} * ${mealFood.quantity}) / 100), 0)`,
       })
       .from(mealFood)
       .innerJoin(meal, eq(mealFood.mealId, meal.id))
