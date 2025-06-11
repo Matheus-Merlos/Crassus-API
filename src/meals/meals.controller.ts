@@ -9,7 +9,9 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/auth.guard';
 import { IsUserPipe } from 'src/pipes/is-user.pipe';
 import { ParseMealPipe } from 'src/pipes/parse-meal.pipe';
 import { ParseUserPipe } from 'src/pipes/parse-user.pipe';
@@ -18,6 +20,7 @@ import { FoodNotFoundException } from './meals.exceptions';
 import { MealsService } from './meals.service';
 
 @Controller('meals')
+@UseGuards(AuthGuard)
 export class MealsController {
   constructor(private readonly mealService: MealsService) {}
 
@@ -38,7 +41,7 @@ export class MealsController {
     @Param('userId', ParseIntPipe, ParseUserPipe, IsUserPipe) userId: number,
   ) {
     try {
-      return this.mealService.listUserMeals(userId);
+      return this.mealService.listUserMeals(+userId);
     } catch (error) {
       throw new HttpException(
         `Internal server error: ${(error as Error).message}.`,
@@ -53,7 +56,7 @@ export class MealsController {
     @Body() mealBody: MealDTO,
   ) {
     try {
-      return this.mealService.createMeal(userId, mealBody);
+      return await this.mealService.patchMeals(userId, mealId, body);
     } catch (error) {
       if (error instanceof FoodNotFoundException)
         throw new BadRequestException(error.message);
@@ -70,7 +73,7 @@ export class MealsController {
     @Param('mealId', ParseIntPipe, ParseMealPipe) mealId: number,
   ) {
     try {
-      return await this.mealService.describeMeal(mealId);
+      return await this.mealService.describeMeal(+mealId);
     } catch (error) {
       throw new HttpException(
         `Internal server error: ${(error as Error).message}.`,

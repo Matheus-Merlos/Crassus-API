@@ -36,3 +36,17 @@ export class MealDTO {
   @Type(() => MealFoodDTO)
   foods: Array<MealFoodDTO>;
 }
+
+export class MealPatchDTO {
+  @IsString()
+  @MaxLength(255)
+  @MinLength(3)
+  @IsOptional()
+  name: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => MealFoodDTO)
+  @IsOptional()
+  foods: Array<MealFoodDTO>;
+}
