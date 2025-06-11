@@ -3,10 +3,7 @@ import { desc, eq, InferSelectModel } from 'drizzle-orm';
 import db from 'src/db';
 import { food, meal, mealFood, mealType } from 'src/db/schema';
 import { MealDTO, MealPatchDTO } from './meals.dto';
-import {
-  FoodNotFoundException,
-  MealNotFoundException,
-} from './meals.exceptions';
+import { FoodNotFoundException } from './meals.exceptions';
 
 @Injectable()
 export class MealsService {
@@ -185,9 +182,6 @@ export class MealsService {
       })
       .from(meal)
       .where(eq(meal.id, mealId));
-    if (!dbMeal) {
-      throw new MealNotFoundException('This meal does not exists');
-    }
 
     const foods = await db
       .select({
@@ -236,11 +230,6 @@ export class MealsService {
   }
 
   async deleteUserMeal(mealId: number) {
-    const [dbMeal] = await db.select().from(meal).where(eq(meal.id, mealId));
-    if (!dbMeal) {
-      throw new MealNotFoundException('This meal does not exists');
-    }
-
     await db.delete(meal).where(eq(meal.id, mealId));
   }
 }
