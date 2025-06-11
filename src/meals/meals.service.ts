@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { desc, eq, InferSelectModel } from 'drizzle-orm';
 import db from 'src/db';
 import { food, meal, mealFood, mealType } from 'src/db/schema';
-import { MealDTO } from './meals.dto';
+import { MealDTO, MealPatchDTO } from './meals.dto';
 import {
   FoodNotFoundException,
   MealNotFoundException,
@@ -48,6 +48,39 @@ export class MealsService {
       }
     });
     return createdMeal;
+  }
+
+  async patchMeals(userId: number, mealId: number, body: MealPatchDTO) {
+    let editedMeal: InferSelectModel<typeof meal> | null = null;
+    if (Object.keys(body).includes('name')) {
+      [editedMeal] = await db.update(meal).set({ name: body.name }).returning();
+    }
+
+    if (Object.keys(body).includes('foods')) {
+      await db.transaction(async (trx) => {
+        await trx.delete(mealFood).where(eq(mealFood.mealId, mealId));
+
+        for (const foodItem of body.foods) {
+          const [dbFood] = await db
+            .select()
+            .from(food)
+            .where(eq(food.id, foodItem.foodId));
+          if (!dbFood) {
+            throw new FoodNotFoundException(
+              `Food id ${foodItem.foodId} does not exist`,
+            );
+          }
+
+          await trx.insert(mealFood).values({
+            foodId: foodItem.foodId,
+            mealId,
+            quantity: foodItem.grams,
+          });
+        }
+      });
+    }
+
+    return editedMeal;
   }
 
   async listUserMeals(userId: number) {
