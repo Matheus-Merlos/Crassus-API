@@ -75,7 +75,7 @@ export class MealsController {
     @Body() mealBody: MealDTO,
   ) {
     try {
-      return await this.mealService.patchMeals(userId, mealId, body);
+      return await this.mealService.createMeal(userId, mealBody);
     } catch (error) {
       if (error instanceof FoodNotFoundException)
         throw new BadRequestException(error.message);
