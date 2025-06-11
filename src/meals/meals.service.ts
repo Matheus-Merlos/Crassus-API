@@ -50,7 +50,11 @@ export class MealsService {
   async patchMeals(userId: number, mealId: number, body: MealPatchDTO) {
     let editedMeal: InferSelectModel<typeof meal> | null = null;
     if (Object.keys(body).includes('name')) {
-      [editedMeal] = await db.update(meal).set({ name: body.name }).returning();
+      [editedMeal] = await db
+        .update(meal)
+        .set({ name: body.name })
+        .where(eq(meal.id, mealId))
+        .returning();
     }
 
     if (Object.keys(body).includes('foods')) {
