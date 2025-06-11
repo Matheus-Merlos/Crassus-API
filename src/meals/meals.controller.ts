@@ -8,10 +8,10 @@ import {
   HttpStatus,
   NotFoundException,
   Param,
-  ParseIntPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
-import { ParseUserPipe } from 'src/pipes/parse-user.pipe';
+import { AuthGuard } from 'src/auth/auth.guard';
 import { MealDTO } from './meals.dto';
 import {
   FoodNotFoundException,
@@ -20,6 +20,7 @@ import {
 import { MealsService } from './meals.service';
 
 @Controller('meals')
+@UseGuards(AuthGuard)
 export class MealsController {
   constructor(private readonly mealService: MealsService) {}
 
@@ -36,11 +37,9 @@ export class MealsController {
   }
 
   @Get(':userId')
-  async listMeals(
-    @Param('userId', ParseIntPipe, ParseUserPipe) userId: number,
-  ) {
+  async listMeals(@Param('userId') userId: string) {
     try {
-      return this.mealService.listUserMeals(userId);
+      return this.mealService.listUserMeals(+userId);
     } catch (error) {
       throw new HttpException(
         `Internal server error: ${(error as Error).message}.`,
@@ -50,12 +49,9 @@ export class MealsController {
   }
 
   @Post(':userId')
-  async createMeal(
-    @Param('userId', ParseIntPipe, ParseUserPipe) userId: number,
-    @Body() mealBody: MealDTO,
-  ) {
+  async createMeal(@Param('userId') userId: string, @Body() mealBody: MealDTO) {
     try {
-      return this.mealService.createMeal(userId, mealBody);
+      return this.mealService.createMeal(+userId, mealBody);
     } catch (error) {
       if (error instanceof FoodNotFoundException)
         throw new BadRequestException(error.message);
@@ -67,11 +63,9 @@ export class MealsController {
   }
 
   @Get(':userId/:mealId')
-  async retrieveMeal(
-    @Param('mealId', ParseIntPipe, ParseUserPipe) mealId: number,
-  ) {
+  async retrieveMeal(@Param('mealId') mealId: string) {
     try {
-      return await this.mealService.describeMeal(mealId);
+      return await this.mealService.describeMeal(+mealId);
     } catch (error) {
       if (error instanceof MealNotFoundException)
         throw new NotFoundException(error.message);
