@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { eq, InferSelectModel } from 'drizzle-orm';
+import { desc, eq, InferSelectModel } from 'drizzle-orm';
 import db from 'src/db';
 import { food, meal, mealFood, mealType } from 'src/db/schema';
 import { MealDTO } from './meals.dto';
@@ -57,7 +57,12 @@ export class MealsService {
       mealTypesSelect.map((m) => [m.id, m.description]),
     );
 
-    const meals = await db.select().from(meal).where(eq(meal.userId, userId));
+    const meals = await db
+      .select()
+      .from(meal)
+      .where(eq(meal.userId, userId))
+      .orderBy(desc(meal.createdAt))
+      .limit(25);
 
     //Formada do jeito que a gente quer
     const formattedMeals = await Promise.all(
@@ -97,7 +102,17 @@ export class MealsService {
       }),
     );
 
-    const formattedMealsGroupedByDate = {};
+    const formattedMealsGroupedByDate: Record<
+      string,
+      Array<{
+        id: number;
+        mealTypeId: number;
+        mealType: string;
+        createdAt: string;
+        name: string;
+        calories: string;
+      }>
+    > = {};
     formattedMeals.forEach((meal) => {
       const date = meal.createdAt;
 
@@ -105,11 +120,28 @@ export class MealsService {
         formattedMealsGroupedByDate[date] = [];
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       formattedMealsGroupedByDate[date].push(meal);
     });
 
-    return formattedMealsGroupedByDate;
+    const response: Array<{
+      date: string;
+      meals: Array<{
+        id: number;
+        mealTypeId: number;
+        mealType: string;
+        createdAt: string;
+        name: string;
+        calories: string;
+      }>;
+    }> = [];
+    for (const [date, meals] of Object.entries(formattedMealsGroupedByDate)) {
+      response.push({
+        date,
+        meals,
+      });
+    }
+
+    return response;
   }
 
   async describeMeal(mealId: number) {
