@@ -4,7 +4,7 @@ import { eq, InferSelectModel } from 'drizzle-orm';
 import * as jwt from 'jsonwebtoken';
 import db from 'src/db';
 import { user as userModel } from 'src/db/schema';
-import { LoginDTO, RegisterDTO } from './auth.dto';
+import { LoginDTO, RegisterDTO, UserPatchDTO } from './auth.dto';
 import {
   UserExistsException,
   UserNotFoundException,
@@ -70,9 +70,28 @@ export class AuthService {
     return { ...userReturn, token };
   }
 
+  async patchUser(userId: number, userPatchDTO: UserPatchDTO) {
+    if (Object.keys(userPatchDTO).includes('birthdate')) {
+      const [day, month, year] = userPatchDTO.birthdate.split('/');
+
+      userPatchDTO.birthdate = `${year}-${month}-${day}`;
+    }
+
+    const [editedUser] = await db
+      .update(userModel)
+      .set(userPatchDTO)
+      .where(eq(userModel.id, userId))
+      .returning();
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { passwordHash, salt, ...userReturn } = editedUser;
+    return userReturn;
+  }
+
   private digest(input: string): string {
     return createHash('sha256').update(input).digest('hex');
   }
+
   private createSalt(lenght: number = 16): string {
     return randomBytes(lenght).toString('hex').substring(0, lenght);
   }
