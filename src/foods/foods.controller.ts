@@ -4,10 +4,13 @@ import {
   HttpException,
   HttpStatus,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/auth.guard';
 import { FoodsService } from './foods.service';
 
 @Controller('foods')
+@UseGuards(AuthGuard)
 export class FoodsController {
   constructor(private readonly foodService: FoodsService) {}
 
