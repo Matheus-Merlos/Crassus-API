@@ -3,8 +3,8 @@ import { createHash, randomBytes } from 'crypto';
 import { eq, InferSelectModel } from 'drizzle-orm';
 import * as jwt from 'jsonwebtoken';
 import db from 'src/db';
-import { user as userModel } from 'src/db/schema';
-import { LoginDTO, RegisterDTO } from './auth.dto';
+import { user, user as userModel } from 'src/db/schema';
+import { LoginDTO, RegisterDTO, UserPatchDTO } from './auth.dto';
 import {
   UserExistsException,
   UserNotFoundException,
@@ -70,9 +70,26 @@ export class AuthService {
     return { ...userReturn, token };
   }
 
+  async patchUser(userId: number, userPatchDTO: UserPatchDTO) {
+    if (Object.keys(userPatchDTO).includes('birthdate')) {
+      const [day, month, year] = userPatchDTO.birthdate.split('/');
+
+      userPatchDTO.birthdate = `${year}-${month}-${day}`;
+    }
+
+    const [editedUser] = await db
+      .update(user)
+      .set(userPatchDTO)
+      .where(eq(user.id, userId))
+      .returning();
+
+    return editedUser;
+  }
+
   private digest(input: string): string {
     return createHash('sha256').update(input).digest('hex');
   }
+
   private createSalt(lenght: number = 16): string {
     return randomBytes(lenght).toString('hex').substring(0, lenght);
   }

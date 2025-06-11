@@ -7,9 +7,13 @@ import {
   HttpException,
   HttpStatus,
   NotFoundException,
+  Param,
+  ParseIntPipe,
+  Patch,
   Post,
 } from '@nestjs/common';
-import { LoginDTO, RegisterDTO } from './auth.dto';
+import { ParseUserPipe } from 'src/pipes/parse-user.pipe';
+import { LoginDTO, RegisterDTO, UserPatchDTO } from './auth.dto';
 import {
   UserExistsException,
   UserNotFoundException,
@@ -51,6 +55,21 @@ export class AuthController {
           `Internal server error: ${(error as Error).message}`,
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
+    }
+  }
+
+  @Patch('user/:userId')
+  async patchUser(
+    @Param('userId', ParseIntPipe, ParseUserPipe) userId: number,
+    @Body() body: UserPatchDTO,
+  ) {
+    try {
+      return await this.authService.patchUser(userId, body);
+    } catch (error) {
+      throw new HttpException(
+        `Internal server error: ${(error as Error).message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
