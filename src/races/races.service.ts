@@ -4,34 +4,22 @@ import db from 'src/db';
 import { race, racePoint } from '../db/schema/index';
 import { CreatePointDto, CreateRaceDto } from './races.dto';
 
-
-
 @Injectable()
 export class RacesService {
-  findAllByUser(userId: number) {
-  return db
-    .select()
-    .from(race)
-    .where(eq(race.user, userId));
+  async findAllByUser(userId: number) {
+    return await db.select().from(race).where(eq(race.user, userId));
   }
-  findOneByUser(id: number, userId: number) {
-  return db
-    .select()
-    .from(race)
-    .where(and(eq(race.id, id), eq(race.user, userId)))
+  async findOneByUser(id: number, userId: number) {
+    return await db
+      .select()
+      .from(race)
+      .where(and(eq(race.id, id), eq(race.user, userId)));
   }
-  createRace(dto: CreateRaceDto) {
-  return db
-    .insert(race)
-    .values(dto)       
-    .returning();
+  async createRace(dto: CreateRaceDto) {
+    return await db.insert(race).values(dto).returning();
   }
 
-  createPoint(dto: CreatePointDto) {
-  return db
-    .insert(racePoint)
-    .values(dto)    
-    .returning();
+  async createPoint(dto: CreatePointDto) {
+    return await db.insert(racePoint).values(dto).returning();
   }
 }
-
