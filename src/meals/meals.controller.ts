@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -15,7 +16,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { IsUserPipe } from 'src/pipes/is-user.pipe';
 import { ParseMealPipe } from 'src/pipes/parse-meal.pipe';
 import { ParseUserPipe } from 'src/pipes/parse-user.pipe';
-import { MealDTO } from './meals.dto';
+import { MealDTO, MealPatchDTO } from './meals.dto';
 import { FoodNotFoundException } from './meals.exceptions';
 import { MealsService } from './meals.service';
 
@@ -43,6 +44,24 @@ export class MealsController {
     try {
       return this.mealService.listUserMeals(+userId);
     } catch (error) {
+      throw new HttpException(
+        `Internal server error: ${(error as Error).message}.`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Patch(':userId/:mealId')
+  async patchMeal(
+    @Param('userId', ParseIntPipe, ParseUserPipe, IsUserPipe) userId: number,
+    @Param('mealId', ParseIntPipe) mealId: number,
+    @Body() body: MealPatchDTO,
+  ) {
+    try {
+      return await this.mealService.patchMeals(userId, mealId, body);
+    } catch (error) {
+      if (error instanceof FoodNotFoundException)
+        throw new BadRequestException(error.message);
       throw new HttpException(
         `Internal server error: ${(error as Error).message}.`,
         HttpStatus.INTERNAL_SERVER_ERROR,
