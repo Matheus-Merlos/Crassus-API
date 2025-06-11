@@ -3,7 +3,7 @@ import { createHash, randomBytes } from 'crypto';
 import { eq, InferSelectModel } from 'drizzle-orm';
 import * as jwt from 'jsonwebtoken';
 import db from 'src/db';
-import { user, user as userModel } from 'src/db/schema';
+import { user as userModel } from 'src/db/schema';
 import { LoginDTO, RegisterDTO, UserPatchDTO } from './auth.dto';
 import {
   UserExistsException,
@@ -78,9 +78,9 @@ export class AuthService {
     }
 
     const [editedUser] = await db
-      .update(user)
+      .update(userModel)
       .set(userPatchDTO)
-      .where(eq(user.id, userId))
+      .where(eq(userModel.id, userId))
       .returning();
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
