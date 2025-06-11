@@ -29,6 +29,8 @@ resource "aws_cloudfront_distribution" "cdn" {
     forwarded_values {
       query_string = true
 
+      headers = [ "authorization" ]
+
       cookies {
         forward = "all"
       }
