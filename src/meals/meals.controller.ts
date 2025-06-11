@@ -8,8 +8,10 @@ import {
   HttpStatus,
   NotFoundException,
   Param,
+  ParseIntPipe,
   Post,
 } from '@nestjs/common';
+import { ParseUserPipe } from 'src/pipes/parse-user.pipe';
 import { MealDTO } from './meals.dto';
 import {
   FoodNotFoundException,
@@ -34,9 +36,11 @@ export class MealsController {
   }
 
   @Get(':userId')
-  async listMeals(@Param('userId') userId: string) {
+  async listMeals(
+    @Param('userId', ParseIntPipe, ParseUserPipe) userId: number,
+  ) {
     try {
-      return this.mealService.listUserMeals(+userId);
+      return this.mealService.listUserMeals(userId);
     } catch (error) {
       throw new HttpException(
         `Internal server error: ${(error as Error).message}.`,
@@ -46,9 +50,12 @@ export class MealsController {
   }
 
   @Post(':userId')
-  async createMeal(@Param('userId') userId: string, @Body() mealBody: MealDTO) {
+  async createMeal(
+    @Param('userId', ParseIntPipe, ParseUserPipe) userId: number,
+    @Body() mealBody: MealDTO,
+  ) {
     try {
-      return this.mealService.createMeal(+userId, mealBody);
+      return this.mealService.createMeal(userId, mealBody);
     } catch (error) {
       if (error instanceof FoodNotFoundException)
         throw new BadRequestException(error.message);
@@ -60,9 +67,11 @@ export class MealsController {
   }
 
   @Get(':userId/:mealId')
-  async retrieveMeal(@Param('mealId') mealId: string) {
+  async retrieveMeal(
+    @Param('mealId', ParseIntPipe, ParseUserPipe) mealId: number,
+  ) {
     try {
-      return await this.mealService.describeMeal(+mealId);
+      return await this.mealService.describeMeal(mealId);
     } catch (error) {
       if (error instanceof MealNotFoundException)
         throw new NotFoundException(error.message);
