@@ -83,7 +83,9 @@ export class AuthService {
       .where(eq(user.id, userId))
       .returning();
 
-    return editedUser;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { passwordHash, salt, ...userReturn } = editedUser;
+    return userReturn;
   }
 
   private digest(input: string): string {
