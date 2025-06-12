@@ -8,7 +8,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { CreatePointDto } from './races.dto';
+import { CreatePointDto, CreateRaceDto } from './races.dto';
 import { RacesService } from './races.service';
 
 @Controller('races')
@@ -28,6 +28,19 @@ export class RacesController {
     return this.svc.findOneByUser(id, userId);
   }
 
+  @Post()
+  async createRace(
+    @Query('userId', ParseIntPipe) userId: number,
+    @Body() dto: CreateRaceDto,
+  ) {
+    const race = await this.svc.findAllByUser(userId);
+    if (!race) {
+      throw new NotFoundException('Corrida não encontrada para usuáio');
+    }
+    
+    return this.svc.createRace({ ...dto, user: userId });
+  }
+  
   // Criado desta maneira para caso usuário não for encontrado já cair fora
   @Post(':id/points')
   async addPoint(
