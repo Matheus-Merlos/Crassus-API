@@ -26,5 +26,14 @@ export class CreateRaceDto {
 
 export class CreatePointDto {
   @IsString()
-  location: string;
+  latitude: string;
+
+  @IsString()
+  longitude: string;
+
+  @Type(() => Date)
+  @IsDate({
+    message: 'timestamp must be in ISO format (ex: 2025-06-12T15:00:00Z)',
+  })
+  timestamp: Date;
 }

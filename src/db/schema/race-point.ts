@@ -1,4 +1,4 @@
-import { integer, pgTable, serial, text } from 'drizzle-orm/pg-core';
+import { integer, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 import race from './race';
 
 export default pgTable('race_point', {
@@ -9,5 +9,7 @@ export default pgTable('race_point', {
       onDelete: 'cascade',
       onUpdate: 'cascade',
     }),
-  location: text('location').notNull(),
+  timestamp: timestamp({ mode: 'date' }).notNull(),
+  latitude: text('location').notNull(),
+  longitude: text('longitude').notNull(),
 });

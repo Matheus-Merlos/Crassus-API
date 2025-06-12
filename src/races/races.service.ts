@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq } from 'drizzle-orm';
 import db from 'src/db';
 import { race, racePoint } from '../db/schema/index';
 import { CreatePointDto, CreateRaceDto } from './races.dto';
@@ -29,10 +29,28 @@ export class RacesService {
     return races;
   }
   async findOneByUser(id: number, userId: number) {
-    return await db
+    const [userRace] = await db
       .select()
       .from(race)
       .where(and(eq(race.id, id), eq(race.user, userId)));
+
+    if (!userRace.name) {
+      userRace.name = `Corrida ${userRace.startTime.getDate().toString().padStart(2, '0')}/${(userRace.startTime.getMonth() + 1).toString().padStart(2, '0')}/${userRace.startTime.getFullYear()}`;
+    }
+
+    const racePoints = await db
+      .select({
+        latitude: racePoint.latitude,
+        longitude: racePoint.longitude,
+        timestamp: racePoint.timestamp,
+      })
+      .from(racePoint)
+      .where(eq(racePoint.race, id))
+      .orderBy(asc(racePoint.timestamp));
+
+    userRace['points'] = racePoints;
+
+    return userRace;
   }
   async createRace(userId: number, dto: CreateRaceDto) {
     const [createdRace] = await db
@@ -55,7 +73,12 @@ export class RacesService {
   async createPoint(raceId: number, dto: CreatePointDto) {
     const [point] = await db
       .insert(racePoint)
-      .values({ location: dto.location, race: raceId })
+      .values({
+        latitude: dto.latitude,
+        longitude: dto.longitude,
+        timestamp: new Date(dto.timestamp),
+        race: raceId,
+      })
       .returning();
 
     return point;
