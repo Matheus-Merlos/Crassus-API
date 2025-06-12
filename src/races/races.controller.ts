@@ -1,57 +1,73 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
-  NotFoundException,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
-  Query,
+  UseGuards,
 } from '@nestjs/common';
-import { CreatePointDto, CreateRaceDto } from './races.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { IsUserPipe } from 'src/pipes/is-user.pipe';
+import { ParseRacePipe } from 'src/pipes/parse-race.pipe';
+import { ParseUserPipe } from 'src/pipes/parse-user.pipe';
+import { CreatePointDto, CreateRaceDto, PatchRaceDTO } from './races.dto';
 import { RacesService } from './races.service';
 
 @Controller('races')
+@UseGuards(AuthGuard)
 export class RacesController {
   constructor(private readonly svc: RacesService) {}
 
-  @Get()
-  listRaces(@Query('userId', ParseIntPipe) userId: number) {
+  @Get(':userId')
+  listRaces(
+    @Param('userId', ParseIntPipe, ParseUserPipe, IsUserPipe) userId: number,
+  ) {
     return this.svc.findAllByUser(userId);
   }
 
-  @Get(':id')
+  @Get(':userId/:raceId')
   async getRace(
-    @Param('id', ParseIntPipe) id: number,
-    @Query('userId', ParseIntPipe) userId: number,
+    @Param('userId', ParseIntPipe, ParseUserPipe, IsUserPipe) userId: number,
+    @Param('raceId', ParseIntPipe, ParseRacePipe) raceId: number,
   ) {
-    return this.svc.findOneByUser(id, userId);
+    return this.svc.findOneByUser(raceId, userId);
   }
 
-  @Post()
+  @Post(':userId')
   async createRace(
-    @Query('userId', ParseIntPipe) userId: number,
+    @Param('userId', ParseIntPipe, ParseUserPipe, IsUserPipe) userId: number,
     @Body() dto: CreateRaceDto,
   ) {
-    const race = await this.svc.findAllByUser(userId);
-    if (!race) {
-      throw new NotFoundException('Corrida não encontrada para usuáio');
-    }
-    
-    return this.svc.createRace({ ...dto, user: userId });
+    return await this.svc.createRace(userId, dto);
   }
-  
-  // Criado desta maneira para caso usuário não for encontrado já cair fora
-  @Post(':id/points')
+
+  @Post(':userId/:raceId/points')
   async addPoint(
-    @Param('id', ParseIntPipe) raceId: number,
-    @Query('userId', ParseIntPipe) userId: number,
+    @Param('raceId', ParseIntPipe, ParseRacePipe) raceId: number,
+    @Param('userId', ParseIntPipe, ParseUserPipe, IsUserPipe) userId: number,
     @Body() dto: CreatePointDto,
   ) {
-    const race = await this.svc.findOneByUser(raceId, userId);
-    if (!race) {
-      throw new NotFoundException('Corrida não encontrada para usuáio');
-    }
-    return await this.svc.createPoint(dto);
+    return await this.svc.createPoint(raceId, dto);
+  }
+
+  @Patch(':userId/:raceId')
+  async patchRace(
+    @Param('raceId', ParseIntPipe, ParseRacePipe) raceId: number,
+    @Param('userId', ParseIntPipe, ParseUserPipe, IsUserPipe) userId: number,
+    @Body() dto: PatchRaceDTO,
+  ) {
+    return await this.svc.patchRace(raceId, dto);
+  }
+
+  @Delete(':userId/:raceId')
+  async deleteRace(
+    @Param('raceId', ParseIntPipe, ParseRacePipe) raceId: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Param('userId', ParseIntPipe, ParseUserPipe, IsUserPipe) userId: number,
+  ) {
+    return await this.svc.deleteRace(raceId);
   }
 }

@@ -17,7 +17,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     }
   }
 
-  price_class = "PriceClass_100"
+  price_class = "PriceClass_All"
 
   default_cache_behavior {
     allowed_methods  = var.allowed_methods
