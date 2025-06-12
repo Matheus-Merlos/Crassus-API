@@ -127,9 +127,8 @@ jobs:
           host: ${{ steps.read-credentials.outputs.server_ip }}
           username: admin
           key: ${{ steps.read-credentials.outputs.server_key }}
-          source: "docker-compose.yaml,src/db/food_data.sql,src/db/meal_type.sql"
+          source: "docker-compose.yaml"
           target: "/home/admin/crassus-api"
-          strip_components: 1
 
       - name: Configure docker and start application
         uses: appleboy/ssh-action@v1.2.0
