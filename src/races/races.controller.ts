@@ -4,12 +4,13 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
 } from '@nestjs/common';
 import { IsUserPipe } from 'src/pipes/is-user.pipe';
 import { ParseRacePipe } from 'src/pipes/parse-race.pipe';
 import { ParseUserPipe } from 'src/pipes/parse-user.pipe';
-import { CreatePointDto, CreateRaceDto } from './races.dto';
+import { CreatePointDto, CreateRaceDto, PatchRaceDTO } from './races.dto';
 import { RacesService } from './races.service';
 
 @Controller('races')
@@ -44,5 +45,14 @@ export class RacesController {
     @Body() dto: CreatePointDto,
   ) {
     return await this.svc.createPoint(raceId, dto);
+  }
+
+  @Patch(':userId/:raceId')
+  async patchRace(
+    @Param('raceId', ParseIntPipe, ParseRacePipe) raceId: number,
+    @Param('userId', ParseIntPipe, ParseUserPipe) userId: number,
+    @Body() dto: PatchRaceDTO,
+  ) {
+    return await this.svc.patchRace(raceId, dto);
   }
 }

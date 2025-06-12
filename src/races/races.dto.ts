@@ -37,3 +37,21 @@ export class CreatePointDto {
   })
   timestamp: Date;
 }
+
+export class PatchRaceDTO {
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  name: string;
+
+  @Type(() => Date)
+  @IsDate({
+    message: 'endTime must be in ISO format (ex: 2025-06-12T15:00:00Z)',
+  })
+  @IsOptional()
+  endTime: Date;
+
+  @IsNumber()
+  @IsOptional()
+  elevation: number;
+}

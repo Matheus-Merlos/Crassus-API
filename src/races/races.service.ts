@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { and, asc, desc, eq } from 'drizzle-orm';
 import db from 'src/db';
 import { race, racePoint } from '../db/schema/index';
-import { CreatePointDto, CreateRaceDto } from './races.dto';
+import { CreatePointDto, CreateRaceDto, PatchRaceDTO } from './races.dto';
 
 @Injectable()
 export class RacesService {
@@ -82,5 +82,19 @@ export class RacesService {
       .returning();
 
     return point;
+  }
+
+  async patchRace(raceId: number, dto: PatchRaceDTO) {
+    const [patchedRace] = await db
+      .update(race)
+      .set({ ...dto, endTime: new Date(dto.endTime) })
+      .where(eq(race.id, raceId))
+      .returning();
+
+    if (!patchedRace.name) {
+      patchedRace.name = `Corrida ${patchedRace.startTime.getDate().toString().padStart(2, '0')}/${(patchedRace.startTime.getMonth() + 1).toString().padStart(2, '0')}/${patchedRace.startTime.getFullYear()}`;
+    }
+
+    return patchedRace;
   }
 }
