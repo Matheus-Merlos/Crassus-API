@@ -14,7 +14,7 @@ export default pgTable('user', {
   passwordHash: varchar('password', { length: 255 }).notNull(),
   salt: varchar({ length: 16 }).notNull(),
   birthdate: date().notNull(),
-  gender: char({ enum: ['M', 'F'] }).notNull(),
+  gender: char({ enum: ['M', 'F'], length: 1 }).notNull(),
   height: decimal().notNull(),
   weight: decimal().notNull(),
 });
