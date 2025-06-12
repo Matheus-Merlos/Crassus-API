@@ -15,11 +15,26 @@ export class RacesService {
       .from(race)
       .where(and(eq(race.id, id), eq(race.user, userId)));
   }
-  async createRace(dto: CreateRaceDto) {
-    return await db.insert(race).values(dto).returning();
+  async createRace(userId: number, dto: CreateRaceDto) {
+    const [createdRace] = await db
+      .insert(race)
+      .values({
+        startTime: new Date(dto.startTime),
+        user: userId,
+        elevation: dto.elevation,
+        name: dto.name,
+      })
+      .returning();
+
+    return createdRace;
   }
 
-  async createPoint(dto: CreatePointDto) {
-    return await db.insert(racePoint).values(dto).returning();
+  async createPoint(raceId: number, dto: CreatePointDto) {
+    const [point] = await db
+      .insert(racePoint)
+      .values({ location: dto.location, race: raceId })
+      .returning();
+
+    return point;
   }
 }

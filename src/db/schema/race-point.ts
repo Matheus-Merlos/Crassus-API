@@ -9,5 +9,5 @@ export default pgTable('race_point', {
       onDelete: 'cascade',
       onUpdate: 'cascade',
     }),
-    location: text('location').notNull(),
-  });
+  location: text('location').notNull(),
+});

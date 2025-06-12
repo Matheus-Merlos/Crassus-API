@@ -1,12 +1,30 @@
-export interface CreateRaceDto {
+import { Type } from 'class-transformer';
+import {
+  IsDate,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
+
+export class CreateRaceDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
   name: string;
+
+  @Type(() => Date)
+  @IsDate({
+    message: 'startTime must be in ISO format (ex: 2025-06-12T15:00:00Z)',
+  })
   startTime: Date;
-  endTime: Date;
+
+  @IsNumber()
+  @IsOptional()
   elevation: number;
-  user: number;
 }
 
-export interface CreatePointDto {
-  race: number;
+export class CreatePointDto {
+  @IsString()
   location: string;
 }
