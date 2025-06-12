@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -54,5 +55,13 @@ export class RacesController {
     @Body() dto: PatchRaceDTO,
   ) {
     return await this.svc.patchRace(raceId, dto);
+  }
+
+  @Delete(':userId/:raceId')
+  async deleteRace(
+    @Param('raceId', ParseIntPipe, ParseRacePipe) raceId: number,
+    @Param('userId', ParseIntPipe, ParseUserPipe) userId: number,
+  ) {
+    return await this.svc.deleteRace(raceId);
   }
 }

@@ -97,4 +97,8 @@ export class RacesService {
 
     return patchedRace;
   }
+
+  async deleteRace(raceId: number) {
+    await db.delete(race).where(eq(race.id, raceId));
+  }
 }
