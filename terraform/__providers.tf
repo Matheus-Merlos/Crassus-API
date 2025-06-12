@@ -7,8 +7,12 @@ terraform {
       version = "~> 5.98.0"
     }
     tls = {
-      source = "hashicorp/tls"
+      source  = "hashicorp/tls"
       version = "~> 4.1.0"
+    }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 5.5.0"
     }
   }
 }
@@ -16,3 +20,8 @@ terraform {
 provider "aws" {
   region = "us-east-1"
 }
+
+provider "cloudflare" {
+  api_token = var.cloudflare_token
+}
+
