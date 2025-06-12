@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import db from 'src/db';
 import { race, racePoint } from '../db/schema/index';
 import { CreatePointDto, CreateRaceDto } from './races.dto';
@@ -7,7 +7,26 @@ import { CreatePointDto, CreateRaceDto } from './races.dto';
 @Injectable()
 export class RacesService {
   async findAllByUser(userId: number) {
-    return await db.select().from(race).where(eq(race.user, userId));
+    const races = await db
+      .select()
+      .from(race)
+      .where(eq(race.user, userId))
+      .orderBy(desc(race.startTime))
+      .limit(25);
+
+    races.forEach((race) => {
+      const dateArray = race.startTime.toISOString().split('T');
+      const date = dateArray[0];
+
+      const [year, month, day] = date.split('-');
+
+      race['date'] = `${day}/${month}/${year}`;
+      if (!race.name) {
+        race.name = `Corrida ${race.startTime.getDate().toString().padStart(2, '0')}/${(race.startTime.getMonth() + 1).toString().padStart(2, '0')}/${race.startTime.getFullYear()}`;
+      }
+    });
+
+    return races;
   }
   async findOneByUser(id: number, userId: number) {
     return await db
@@ -25,6 +44,10 @@ export class RacesService {
         name: dto.name,
       })
       .returning();
+
+    if (!createdRace.name) {
+      createdRace.name = `Corrida ${createdRace.startTime.getDate().toString().padStart(2, '0')}/${(createdRace.startTime.getMonth() + 1).toString().padStart(2, '0')}/${createdRace.startTime.getFullYear()}`;
+    }
 
     return createdRace;
   }
