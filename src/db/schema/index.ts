@@ -6,13 +6,4 @@ import race from './race';
 import racePoint from './race-point';
 import user from './user';
 
-export {
-  food,
-  meal,
-  mealFood,
-  mealType,
-  race,
-  racePoint,
-  user
-};
-
+export { food, meal, mealFood, mealType, race, racePoint, user };

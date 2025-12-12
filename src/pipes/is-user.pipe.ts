@@ -1,5 +1,4 @@
 import {
-  ArgumentMetadata,
   Inject,
   Injectable,
   PipeTransform,
@@ -16,7 +15,7 @@ import * as jwt from 'jsonwebtoken';
 export class IsUserPipe implements PipeTransform {
   constructor(@Inject(REQUEST) private readonly request: Request) {}
 
-  transform(value: number, metadata: ArgumentMetadata) {
+  transform(value: number) {
     const authHeader = this.request.headers['authorization']!;
 
     const [, token] = authHeader.split(' ');
