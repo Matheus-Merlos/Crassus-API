@@ -13,7 +13,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { IsUserPipe } from 'src/pipes/is-user.pipe';
 import { ParseUserPipe } from 'src/pipes/parse-user.pipe';
 import { LoginDTO, RegisterDTO, UserPatchDTO } from './auth.dto';
@@ -25,7 +25,7 @@ import {
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 
-@ApiTags('Authentication')
+@ApiTags('Auth')
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -54,9 +54,13 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login a user' })
-  @ApiResponse({ status: 200, description: 'User logged in successfully.' })
+  @ApiResponse({
+    status: 200,
+    description: 'User logged in successfully.',
+  })
   @ApiResponse({ status: 404, description: 'User not found.' })
   @ApiResponse({ status: 400, description: 'Wrong password.' })
+  @ApiBody({ type: LoginDTO })
   async login(@Body() body: LoginDTO) {
     try {
       return await this.authService.login(body);
