@@ -10,7 +10,7 @@ import { race } from 'src/db/schema';
 
 @Injectable()
 export class ParseRacePipe implements PipeTransform {
-  async transform(value: number, metadata: ArgumentMetadata) {
+  async transform(value: number, _metadata: ArgumentMetadata) {
     const [usr] = await db.select().from(race).where(eq(race.id, value));
 
     if (!usr) {

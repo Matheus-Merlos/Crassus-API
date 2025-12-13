@@ -10,7 +10,7 @@ import { user } from 'src/db/schema';
 
 @Injectable()
 export class ParseUserPipe implements PipeTransform {
-  async transform(value: number, metadata: ArgumentMetadata) {
+  async transform(value: number, _metadata: ArgumentMetadata) {
     const [usr] = await db.select().from(user).where(eq(user.id, value));
 
     if (!usr) {
