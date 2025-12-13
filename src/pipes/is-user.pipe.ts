@@ -4,6 +4,7 @@ import {
   PipeTransform,
   Scope,
   UnauthorizedException,
+  ArgumentMetadata,
 } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
@@ -15,7 +16,7 @@ import * as jwt from 'jsonwebtoken';
 export class IsUserPipe implements PipeTransform {
   constructor(@Inject(REQUEST) private readonly request: Request) {}
 
-  transform(value: number) {
+  transform(value: number, _metadata: ArgumentMetadata) {
     const authHeader = this.request.headers['authorization']!;
 
     const [, token] = authHeader.split(' ');
